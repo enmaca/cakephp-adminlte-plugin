@@ -21,7 +21,7 @@ class AdminLTEHtmlHelper extends HtmlHelper
 
     public $_currentTab = null;
 
-    public function __construct(View $View, $settings = array( ))
+    public function __construct(View $View, $settings = array())
     {
         parent::__construct($View, $settings);
         $this->_tags['section'] = '<section %s>%s</section>';
@@ -287,7 +287,8 @@ class AdminLTEHtmlHelper extends HtmlHelper
     {
         $buffer = ob_get_clean();
         $_sidebar_html_str = '<aside class="control-sidebar control-sidebar-' . $this->_controlSideBarStartOptions['color'] . '" style="position: fixed;">' . $buffer . '</aside><div class="control-sidebar-bg"></div>';
-        define('AdminLTE_ControlSideBar_HTML', $_sidebar_html_str);
+        if (! defined('AdminLTE_ControlSideBar_HTML'))
+            define('AdminLTE_ControlSideBar_HTML', $_sidebar_html_str);
     }
 
     /**
@@ -509,6 +510,10 @@ EOF;
             }
         }
 
+        $for_attr = '';
+        if (array_key_exists('for', $options))
+            $for_attr = 'for="' . $options['for'] . '"';
+
         if (! array_key_exists('button-size', $options))
             $options['button-size'] = '';
 
@@ -541,9 +546,13 @@ EOF;
         $onclick_str = '';
         if (isset($options['onclick'])) {
             $onclick_str = ' onclick="' . $options['onclick'] . '"';
-            
+
             unset($options['onclick']);
         }
+
+        $action = 'form';
+        if (array_key_exists('action', $options))
+            $action = $options['action'];
 
         $attributes_str = '';
         if (array_key_exists('attributes', $options) && is_array($options['attributes'])) {
@@ -556,7 +565,7 @@ EOF;
         }
 
         $html_data = <<<EOF
-        <button id="{$field_id}" class="btn {$options['button-size']} {$options['button-type']}"{$style}{$onclick_str}{$attributes_str}>{$icon_str}{$fieldName}</button>
+        <button id="{$field_id}" {$for_attr} type="{$action}" class="btn {$options['button-size']} {$options['button-type']}"{$style}{$onclick_str}{$attributes_str}>{$icon_str}{$fieldName}</button>
 EOF;
         return $html_data;
     }

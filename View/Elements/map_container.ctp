@@ -1,35 +1,24 @@
 <div id="map-widget">
 <?php
-    $debug_col = [];
-    if ($map_options['debuggable']) {
-        $map_size = 6;
-        $debug_col['size'] = 6;
-        $debug_col['content'] = $this->element('AdminLTE.map_debugger', [
-            'map_options' => $map_options
-        ]);
-    } else {
-        $map_size = intval($map_options['container_size']);
-        $debug_col['size'] = 0;
-        $debug_col['content'] = '';
-    }
+$debug_col = [];
+if ($map_options['debuggable']) {
+    $map_size = 6;
+    $debug_col['size'] = 6;
+    $debug_col['content'] = $this->element('AdminLTE.map_debugger', [
+        'map_options' => $map_options
+    ]);
+} else {
+    $map_size = intval($map_options['container_size']);
+    $debug_col['size'] = 0;
+    $debug_col['content'] = '';
+}
 ?>
-<?= $this->Form->inputRow([
-        'size' => $map_size,
-        'content' => $this->element('AdminLTE.map', [
-            'map_options' => $map_options
-        ])
-    ],
-    $debug_col, [
-        'settings' => [
-            'pre' => '<hr>'
-        ]
-]); ?>
-<?= $this->Html->script('AdminLTE.jQuery/jQuery-2.2.4') ?>
-<?= $this->Html->script('https://js.pusher.com/4.3/pusher.min.js') ?>
-<?= $this->Html->script("https://maps.googleapis.com/maps/api/js?key={$google_maps_key}&libraries=visualization") ?>
+<?=$this->Form->inputRow(['size' => $map_size,'content' => $this->element('AdminLTE.map', ['map_options' => $map_options])], $debug_col, ['settings' => ['pre' => '<hr>']]);?>
+<?=$this->Html->script('AdminLTE.jQuery/jQuery-2.2.4')?>
+<?=$this->Html->script("https://maps.googleapis.com/maps/api/js?key={$google_maps_key}&libraries=visualization")?>
 <script type="text/javascript">
-    var m_markers = JSON.parse('<?= json_encode($map_options['markers']) ?>');
-    var m_layer = JSON.parse('<?= json_encode($map_options['layer']) ?>');
+    var m_markers = JSON.parse('<?=json_encode($map_options['markers'])?>');
+    var m_layer = JSON.parse('<?=json_encode($map_options['layer'])?>');
     var new_markers = [];
     var polylines = [];
     var markers = [];
@@ -37,13 +26,13 @@
 
     $(document).ready(function () {
         var map_options = {
-            center: {lat: <?= $map_options['center']['latitude'] ?>, lng: <?= $map_options['center']['longitude'] ?>},
-            zoom: <?= $map_options['zoom'] ?>,
-            mapTypeId: '<?= $map_options['type'] ?>',
-            disableDefaultUI: <?= $map_options['disable_default_ui'] ? 'true' : 'false' ?>
+            center: {lat: <?=$map_options['center']['latitude']?>, lng: <?=$map_options['center']['longitude']?>},
+            zoom: <?=$map_options['zoom']?>,
+            mapTypeId: '<?=$map_options['type']?>',
+            disableDefaultUI: <?=$map_options['disable_default_ui'] ? 'true' : 'false'?>
         };
 
-        if (<?= $map_options['disable_zoom'] ? 'true' : 'false' ?>) {
+        if (<?=$map_options['disable_zoom'] ? 'true' : 'false'?>) {
             map_options['gestureHandling'] = 'none';
             map_options['zoomControl'] = false;
         }
@@ -92,47 +81,6 @@
             }
         });
 
-        // Enable pusher logging - don't include this in production
-        Pusher.logToConsole = <?= ((Configure::read('debug') > 0) ? 'true' : 'false') ?>;
-
-        var pusher = new Pusher('<?= $pusher_key ?>', {
-            cluster: '<?= $pusher_cluster ?>',
-            forceTLS: true
-        });
-
-        var channel = pusher.subscribe('my-channel');
-        channel.bind('my-event', function(data) {
-
-            json = JSON.parse(data.payload);
-            if (json.type === 'FeatureCollection') {
-
-                clearMapObjects();
-
-                $.each(json.features, function (index, value) {
-
-                    if (value.geometry.type === 'LineString') {
-                        var driverCoordinates = [];
-                        $.each(value.geometry.coordinates, function (i, v) {
-                            driverCoordinates.push({
-                                'lat': v[0],
-                                'lng': v[1]
-                            });
-                        });
-                        var drivePath = new google.maps.Polyline({
-                            path: driverCoordinates,
-                            geodesic: true,
-                            strokeColor: '#FF0000',
-                            strokeOpacity: 1.0,
-                            strokeWeight: 2
-                        });
-
-                        drivePath.setMap(map);
-                        polylines.push(drivePath);
-                    }
-                });
-            }
-        });
-
         $('#get_geojson').click(function () {
             var m_url = $('#url').val(),
                 $geojson = $('#geojson'),
@@ -152,7 +100,7 @@
                 $(this).addClass('disabled')
                     .html($('<img />', {src: '/img/ajax-loader.gif', width: 25}));
                 $.ajax({
-                    url: '<?= Router::url(['controller' => 'AdminLTEMap', 'action' => 'downloadGeoJson', 'plugin' => 'AdminLTE']) ?>',
+                    url: '<?=Router::url(['controller' => 'AdminLTEMap','action' => 'downloadGeoJson','plugin' => 'AdminLTE'])?>',
                     data: {url: m_url},
                     cache: false,
                     type: 'POST',
@@ -173,10 +121,10 @@
                             alert(json.errorMsg);
                         }
                     }, error: function () {
-                        alert('<?= __('Error in AJAX request') ?>');
+                        alert('<?=__('Error in AJAX request')?>');
                     }, complete: function () {
                         $('#get_geojson').removeClass('disabled')
-                            .html('<?= __('Get and Draw') ?>');
+                            .html('<?=__('Get and Draw')?>');
                     }
                 });
             } else {
@@ -193,7 +141,7 @@
                     }
                     drawPolyline(m_data);
                 } else {
-                    alert('<?= __('No data in URL neither in GeoJson text area') ?>');
+                    alert('<?=__('No data in URL neither in GeoJson text area')?>');
                 }
             }
         });
@@ -209,7 +157,7 @@
             }
         });
     });
-    
+
     function drawPolyline(data) {
         if (data.type === 'FeatureCollection') {
 
@@ -227,7 +175,7 @@
                 }
                 if (typeof properties.name === 'undefined')
                     return; // Corrupt data
-                
+
                 if (value.geometry.type === 'LineString' && properties.name === 'gmap_overview_polyline') {
                     var driverCoordinates = [];
 

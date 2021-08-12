@@ -97,14 +97,12 @@ class AdminLTEWidgetsHelper extends HtmlHelper
          * because every project can have a different API Key
          */
         $google_maps_key = Configure::read('google_maps_key');
-        $pusher_cluster = Configure::read('Pusher.cluster');
-        $pusher_key = Configure::read('Pusher.api_key');
         $map_options = $this->map_options;
 
         if (empty($google_maps_key)) {
             throw new BadRequestException('Missing Google Maps API key');
         }
-        $this->_View->set(compact('google_maps_key', 'map_options', 'pusher_cluster', 'pusher_key'));
+        $this->_View->set(compact('google_maps_key', 'map_options'));
         return $this->_View->render('AdminLTE.Elements/map_container', false);
     }
 
@@ -217,31 +215,32 @@ class AdminLTEWidgetsHelper extends HtmlHelper
 
         if ($return == false)
             print $_box_html_str;
-        else 
+        else
             return $_box_html_str;
     }
 
     /**
      * Processes an array of parameters given at _defaultBoxOptions.
      *
-     * @param string $params Index for search in _defaultBoxOptions
+     * @param string $params
+     *            Index for search in _defaultBoxOptions
      * @return string
      */
     private function process_box_params($params = '')
     {
-        if (empty($params) || !is_string($params) || !isset($this->_defaultBoxOptions[$params]))
+        if (empty($params) || ! is_string($params) || ! isset($this->_defaultBoxOptions[$params]))
             return '';
 
         $elements = [];
 
         foreach ($this->_defaultBoxOptions[$params] as $index => $param) {
-            if (!is_string($param))
+            if (! is_string($param))
                 continue;
 
             if (is_numeric($index))
                 array_push($elements, $param);
             else {
-                array_push($elements, $index.'="'.$param.'"');
+                array_push($elements, $index . '="' . $param . '"');
             }
         }
 

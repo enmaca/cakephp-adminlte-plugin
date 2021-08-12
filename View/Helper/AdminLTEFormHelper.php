@@ -3,6 +3,7 @@ App::uses('ClassRegistry', 'Utility');
 App::uses('AppHelper', 'View/Helper');
 App::uses('Hash', 'Utility');
 App::uses('Inflector', 'Utility');
+App::uses('CakeTime', 'Utility');
 
 /**
  * Form helper library.
@@ -1225,7 +1226,7 @@ class AdminLTEFormHelper extends AppHelper
             case 'hidden':
                 return $this->hidden($fieldName, $options);
             case 'checkbox':
-                return '<label>' . $this->checkbox($fieldName, $options) . ' ' . (empty($options['label']) ? $fieldName : '') . '</label>';
+                return '<label>' . $this->checkbox($fieldName, $options) . '</label>';
             case 'radio':
                 return $this->radio($fieldName, $radioOptions, $options);
             case 'file':
@@ -1698,7 +1699,7 @@ class AdminLTEFormHelper extends AppHelper
         $value = current($this->value($valueOptions));
         $output = '';
         $label = '';
-        if (isset($options['label'])) {
+        if (! empty($options['label'])) {
             $label = '&nbsp; <label style="padding-left: 0px !important" for="' . $options['id'] . '">' . $options['label'] . '</label>';
         }
 
@@ -1769,10 +1770,10 @@ class AdminLTEFormHelper extends AppHelper
         $out = array();
         $out[] = '<div class="iradio">';
         foreach ($options as $value => $input_label)
-            $out[] = '<input type="radio" name="' . $_options['name'] . '" id="' . $_options['id'] . '" value="' . $value . '" ' . ($_options['value'] == $value ? 'checked ' : '') . ' ' . (array_key_exists('disabled', $_options) ? 'disabled ' : '') . '>&nbsp;' . $input_label . '&nbsp;';
+            $out[] = '<input type="radio" name="' . $_options['name'] . '" id="' . $_options['id'] . '_' . $value . '" value="' . $value . '" ' . ($_options['value'] == $value ? 'checked ' : '') . ' ' . (array_key_exists('disabled', $_options) ? 'disabled ' : '') . '>&nbsp;' . $input_label . '&nbsp;';
 
         $out[] = '</div>';
-        $this->_View->append("scriptAddTemplate", "\$('input[id=\"" . $_options['id'] . "\"]').iCheck({checkboxClass: 'icheckbox_square-blue',radioClass: 'iradio_square-blue',increaseArea: '20%'});\n");
+        $this->_View->append("scriptAddTemplate", "\$('input[id^=\"" . $_options['id'] . "\"]').iCheck({checkboxClass: 'icheckbox_square-blue',radioClass: 'iradio_square-blue',increaseArea: '20%'});\n");
 
         return $label . join('', $out);
     }
@@ -2839,11 +2840,15 @@ EOF;
             return $this->select_twoside($fieldName, $options, $attributes);
 
         if (! defined('adminlteformhelper.select.included_helpers_select2')) {
-            $this->Html->css('AdminLTE.select2/select2', array(
+            $this->Html->css('AdminLTE.select2/4.0.11/select2.min', array(
                 'inline' => false
             ));
 
-            $this->Html->script('AdminLTE.select2/select2', array(
+            $this->Html->css('AdminLTE.select2/bootstrap-3-0.1.0-beta.10/select2-bootstrap.min', array(
+                'inline' => false
+            ));
+
+            $this->Html->script('AdminLTE.select2/4.0.11/select2.min', array(
                 'inline' => false
             ));
             define('adminlteformhelper.select.included_helpers_select2', true);
@@ -3724,6 +3729,81 @@ EOF;
         if (! empty($options['value']))
             $this->_View->append("scriptAddTemplate", "\$('input[id=\"" . $this->_extractOption('id', $options, null) . "\"]').datepicker('setDate', '" . $options['value'] . "');");
 
+        return $toReturn;
+    }
+
+    /**
+     * Return a DateTimePicker element
+     *
+     * ### Options
+     *
+     * - `label` - Label for the DatePicker input
+     * - `id` - Id for the DatePicker input
+     *
+     * @param mixed $fieldName
+     *            Label for the input
+     * @param array $options
+     *            Array of options to append options into.
+     * @return string
+     */
+    public function dateTimePicker($fieldName, $options = array())
+    {
+        if (! defined('adminlteformhelper.checkbox.included_helpers_datetimepicker')) {
+            $this->Html->css('AdminLTE.datetimepicker/4.17.47/bootstrap-datetimepicker', array(
+                'inline' => false
+            ));
+
+            $this->Html->script('AdminLTE.moment/moment-2.10.2', array(
+                'inline' => false
+            ));
+
+            $this->Html->script('AdminLTE.datetimepicker/4.17.47/bootstrap-datetimepicker', array(
+                'inline' => false
+            ));
+            define('adminlteformhelper.checkbox.included_helpers_datetimepicker', true);
+        }
+
+        $options = $this->_initInputField($fieldName, $options);
+
+        $label_str = '<label>' . $fieldName . '</label>';
+
+        if (isset($options['label']))
+            if ($options['label'] === false)
+                $label_str = '';
+            else
+                $label_str = '<label>' . $options['label'] . '</label>';
+
+        $value_option = '';
+
+        $toReturn = <<<EOF
+<div class="form-group">
+    {$label_str}
+    <div class="input-group date">
+        <div class="input-group-addon"><i class="fa fa-calendar"></i></div>
+        <input class="form-control pull-right" name="{$options['name']}" id="{$options['id']}" {$value_option} type="text">
+    </div>
+</div>
+EOF;
+
+        if (empty($options['datetimepicker_options'])) {
+            $options['datetimepicker_options'] = [];
+        }
+
+        $options['datetimepicker_options'] += [
+            'format' => 'YYYY-MM-DD HH:mm:ss'
+        ];
+
+        $datetimepicker_opts = '';
+
+        if (! empty($options['datetimepicker_options'])) {
+            $datetimepicker_opts = Zend\Json\Json::encode($options['datetimepicker_options'], false, array(
+                'enableJsonExprFinder' => true
+            ));
+            unset($options['datetimepicker_options']);
+        }
+        $this->_View->append("scriptAddTemplate", "\$('input[id=\"" . $this->_extractOption('id', $options, null) . "\"]').datetimepicker(" . $datetimepicker_opts . ");");
+        if (! empty($options['value']))
+            $this->_View->append("scriptAddTemplate", "\$('input[id=\"" . $this->_extractOption('id', $options, null) . "\"]').datetimepicker('defaultDate', '" . $options['value'] . "');");
         return $toReturn;
     }
 
