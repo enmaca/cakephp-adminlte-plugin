@@ -1098,6 +1098,7 @@ class AdminLTEFormHelper extends AppHelper
         $this->setEntity($fieldName);
 
         $divOptions = $this->_divOptions($options);
+        $radioOptions = [];
         unset($options['div']);
         if ($options['type'] === 'radio' && isset($options['options'])) {
             $radioOptions = (array) $options['options'];
@@ -1117,7 +1118,8 @@ class AdminLTEFormHelper extends AppHelper
 
         $selected = $this->_extractOption('selected', $options, null);
         unset($options['selected']);
-
+        $dateFormat = '';
+        $timeFormat = '';
         if ($options['type'] === 'datetime' || $options['type'] === 'date' || $options['type'] === 'time') {
             $dateFormat = $this->_extractOption('dateFormat', $options, 'MDY');
             $timeFormat = $this->_extractOption('timeFormat', $options, 12);

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/Vendor/psr/log" />
+      <excludeFolder url="file://$MODULE_DIR$/Vendor/spatie/image-optimizer" />
+      <excludeFolder url="file://$MODULE_DIR$/Vendor/composer" />
+      <excludeFolder url="file://$MODULE_DIR$/Vendor/zendframework/zend-json" />
+      <excludeFolder url="file://$MODULE_DIR$/Vendor/eventviva/php-image-resize" />
+      <excludeFolder url="file://$MODULE_DIR$/Vendor/symfony/process" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
